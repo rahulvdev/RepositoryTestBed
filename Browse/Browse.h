@@ -12,7 +12,7 @@ class Browse {
 public:
 	using Item = std::string;
 	using DbHandle = DbCore<T>;
-	Browse(DbHandle db,const Item& repoPath) :dbH(db),repoPath_(repoPath){}
+	Browse(DbHandle& db,const Item& repoPath) :dbH(db),repoPath_(repoPath){}
 	void showPackageMetadata();
 	void showAllPackages();
 	void showFullPackageText();
@@ -51,7 +51,7 @@ inline void Browse<T>::showPackageMetadata()
 template<typename T>
 inline void Browse<T>::showAllPackages()
 {	
-	std::cout << "------------------------------\n";
+	std::cout << "\n------------------------------\n";
 	std::cout << "\nShowing all packages in the repository\n";
 	std::cout << "------------------------------\n";
 	RepoUtility::showKeys(dbH);
@@ -63,14 +63,18 @@ inline void Browse<T>::showFullPackageText()
 {
 	Item packageName;
 	size_t version = 1;
-	std::cout << "Enter the name of the package whose metadata you want to see\n";
+	std::cout << "\nEnter the name of the package whose text you want to see\n";
 		std::cin >> packageName;
+		std::cin.ignore(INT_MAX,'\n');
 	if (!RepoUtility::checkFileExistance(packageName, dbH))
 		return;
 
 	std::cout << "Enter the version number of the package\n";
-	while (!std::cin >> version)
-		std::cout << "Please enter a number for the version\n";
+	while (!(std::cin >> version)) {
+		std::cin.clear();
+		std::cin.ignore(INT_MAX, '\n');
+		std::cout << "Invalid input.Try again: ";
+	}
 
 	if (dbH.getVersionNumber(packageName) < version) {
 		std::cout << "The version number you have entered is invalid\n";

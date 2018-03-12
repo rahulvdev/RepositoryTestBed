@@ -24,6 +24,7 @@ public:
 	bool checkIfFileExists();
 	bool verifyAuthor(Item fileName);
 	bool dependancyExistenceCheck(Item fileName);
+	bool checkPrevCheckInStatus(Item fileName);
 	std::string getFileNameOnly(std::string fullPath);
 
 private:
@@ -90,30 +91,48 @@ bool CheckIn<T>::commit() {
 		DbElement<T> dbElem = createDbElement(fileName);
 		bool isFilePresent = dbH.contains(fileName);
 		if (isFilePresent && open == true && dependancyExistenceCheck(fileName)) {
-			//Do not change file version
-			dbH[fileName] = dbElem;
-			size_t currentVersion = dbH.getVersionNumber(fileName);
-			size_t extensionIndex = fileName.find('.');
-			std::string fileNameWithExtension = RepoUtility::fileNameWithExtension(fileName, currentVersion);
-			std::string destination = repoPath + fileNameWithExtension;
-			FileSystem::File::remove(destination);
-			FileSystem::File::copy(fileSrc,destination);
-			retVal = true;
+			if (checkPrevCheckInStatus(fileName)) {
+				//Do not change file version
+				dbH[fileName] = dbElem;
+				size_t currentVersion = dbH.getVersionNumber(fileName);
+				std::string fileNameWithExtension = RepoUtility::fileNameWithExtension(fileName, currentVersion);
+				std::string destination = repoPath + fileNameWithExtension;
+				FileSystem::File::remove(destination);
+				FileSystem::File::copy(fileSrc, destination);
+				retVal = true;
+			}
+			else {
+				dbH[fileName] = dbElem;
+				size_t updatedVersion = dbH.updateVersionNumber(fileName);
+				std::string updatedFileWithExt = RepoUtility::fileNameWithExtension(fileName, updatedVersion);
+				std::string fileNameWithPath = repoPath + updatedFileWithExt;
+				FileSystem::File::copy(fileSrc, fileNameWithPath);
+			}
 		}
 		else if (isFilePresent && open == false && dependancyExistenceCheck(fileName)) {
-			dbH[fileName] = dbElem;
-			//size_t preVersion = dbH.getVersionNumber(fileName);
-			size_t updatedVersion=dbH.updateVersionNumber(fileName);
-			//Updated version file
-			std::string fileNameWithExtension = RepoUtility::fileNameWithExtension(fileName, updatedVersion);
-			//Previous version file
-			//std::string  prevFile= RepoUtility::fileNameWithExtension(fileName, preVersion);
-			//std::string prevFilePath = repoPath + prevFile;
-			std::string destination = repoPath + fileNameWithExtension;
-			//FileSystem::File::remove(prevFilePath);
-			FileSystem::File::copy(fileSrc,destination);
-			retVal = true;
-			//Copy updated file to repository directory with updated name to reflect version
+			if (checkPrevCheckInStatus(fileName)) {
+				size_t currentIndex = dbH.getVersionNumber(fileName);
+				std::string currentFileWithVersion = RepoUtility::fileNameWithExtension(fileName, currentIndex);
+				std::string currStrFullPath = repoPath + currentFileWithVersion;
+				FileSystem::File::remove(currStrFullPath);
+				//Update DBElement after getting the file's previous checkIn status
+				dbH[fileName] = dbElem;
+				size_t updatedVersion = dbH.updateVersionNumber(fileName);
+				//Updated version file
+				std::string fileNameWithExtension = RepoUtility::fileNameWithExtension(fileName, updatedVersion);
+				std::string destination = repoPath + fileNameWithExtension;
+				FileSystem::File::copy(fileSrc, destination);
+				retVal = true;
+			}
+			else {
+				dbH[fileName] = dbElem;
+				size_t updatedVersion = dbH.updateVersionNumber(fileName);
+				//Updated version file
+				std::string fileNameWithExtension = RepoUtility::fileNameWithExtension(fileName, updatedVersion);
+				std::string destination = repoPath + fileNameWithExtension;
+				FileSystem::File::copy(fileSrc, destination);
+				retVal = true;
+			}
 		}
 		else if(!isFilePresent){
 				dbH[fileName] = dbElem;
@@ -169,10 +188,25 @@ bool CheckIn<T>::dependancyExistenceCheck(Item fileName) {
 	DbElement<T> dbElem = dbH[fileName];
 	typename CheckIn<T>::Items children = dbElem.children();
 	for (const auto& child : children) {
-		if (!dbH.contains(child))
+		if (!dbH.contains(child)) {
+			std::cout << "*** Dependant files are not present in the Repository ***\n";
+			std::cout << "*** Please push dependant files and then check-in ***\n";
 			return false;
+		}
 	}
 	return true;
 	
+}
+
+template<typename T>
+inline bool CheckIn<T>::checkPrevCheckInStatus(Item fileName)
+{
+	DbElement<T> currentElement = dbH[fileName];
+	Payload currentPl = currentElement.payLoad();
+	if (currentPl.checkInStatus())
+		return true;
+	else
+		return false;
+
 }
 

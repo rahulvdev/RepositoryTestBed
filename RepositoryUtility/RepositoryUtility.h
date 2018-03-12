@@ -62,7 +62,6 @@ namespace RepoUtility {
 		out << std::setw(26) << std::left << "------------------------";
 		out << std::setw(10) << std::left << "--------";
 		out << std::setw(25) << std::left << "-----------------------";
-		out << std::setw(25) << std::left << "-----------------------";
 	}
 	//----< display DbElements >-----------------------------------------
 
@@ -83,7 +82,7 @@ namespace RepoUtility {
 				out << " " << key;
 			}
 		}
-		out << "--------------Payload-------------------\n\n";
+		out << "\n\n--------------Payload-------------------\n\n";
 		Payload pl = el.payLoad();
 		Item checkInStatus = pl.checkInStatus() ? "open" : "close";
 		out << "File Path -> " << pl.filePath() << "\n";

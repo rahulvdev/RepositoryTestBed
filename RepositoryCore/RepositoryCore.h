@@ -18,11 +18,11 @@ namespace Repository {
 		RepositoryCore();
 		bool checkIn(Item author, Item description, Items children, Items categories, Item fileName, bool checkInStatus);
 		bool checkOut(Item fileName,int version);
-		void browse(Item fileName,int version);
+		void browse();
 
 	private:
-		std::string repoPath = "../FileRepository/";
-		 DbCore_ db;
+		Item repoPath = "../FileRepository/";
+		DbCore_ db;
 	};
 
 
@@ -52,14 +52,16 @@ namespace Repository {
 			return true;
 	}
 
-	void RepositoryCore::browse(Item fileName,int version)
+	void RepositoryCore::browse()
 	{
 		int browseOption;
-		std::cout << "The following browse types are supported\n";
+		std::cout << "\n----------------------------------------------------------------------------------------------\n";
+		std::cout << "\nThe following browse types are supported\n";
 		std::cout << "1. Display package metadata\n";
 		std::cout << "2. Display all files in the repository\n";
 		std::cout << "3. Display full package text\n";
 		std::cout << "Enter the option number to choose what type of browsing activity you would like to perform\n";
+		std::cout << "----------------------------------------------------------------------------------------------\n";
 		std::cin >> browseOption;
 		Browse<Payload> br(db, repoPath);
 		switch (browseOption) {
@@ -70,7 +72,8 @@ namespace Repository {
 		case 3:	br.showFullPackageText();
 				break;
 		default:
-			std::cout << "Pleas enter any option between 1 and 3\n";
+				std::cout << "Pleas enter any option between 1 and 3\n";
+				break;
 
 		}
 	}
