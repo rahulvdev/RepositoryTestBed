@@ -1,4 +1,12 @@
 #pragma once
+/////////////////////////////////////////////////////////////////////
+// Browse.h - Supports browsing feature for the Repository                        
+// Author : Rajath Umesh Joshi, CSE687 - Object Oriented Design, Spring 2017    
+// Dependencies :
+// RepositoryUtility.h
+// DbCore.h
+/////////////////////////////////////////////////////////////////////
+
 #include <string>
 #include <cstdlib>
 #include "../DbCore/DbCore.h"
@@ -12,15 +20,16 @@ class Browse {
 public:
 	using Item = std::string;
 	using DbHandle = DbCore<T>;
-	Browse(DbHandle& db,const Item& repoPath) :dbH(db),repoPath_(repoPath){}
+	Browse(DbHandle& db,const Item& repoPath) :dbH(db),repoPath_(repoPath){}                   
 	void showPackageMetadata();
 	void showAllPackages();
-	void showFullPackageText();
+	void showFullPackageText(Item packageName,int version);
 private:
 	Item repoPath_;
 	DbHandle& dbH;
 };
 
+// This function shows the details of each package in the repository.
 template<typename T>
 inline void Browse<T>::showPackageMetadata()
 {
@@ -48,6 +57,7 @@ inline void Browse<T>::showPackageMetadata()
 	RepoUtility::showElem(dbElem);
 }
 
+// This function shows all the packages in the repository.
 template<typename T>
 inline void Browse<T>::showAllPackages()
 {	
@@ -57,9 +67,9 @@ inline void Browse<T>::showAllPackages()
 	RepoUtility::showKeys(dbH);
 
 }
-
+// This function shows full package text.
 template<typename T>
-inline void Browse<T>::showFullPackageText()
+inline void Browse<T>::showFullPackageText(Item packageName,int version)
 {
 	Item packageName;
 	size_t version = 1;

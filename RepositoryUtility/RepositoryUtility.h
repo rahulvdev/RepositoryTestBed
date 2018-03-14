@@ -1,4 +1,10 @@
 #pragma once
+/////////////////////////////////////////////////////////////////////
+// RepositoryUtility.h -  Utility methods that assist in the process of file Checkin , Checkout and browse.                   
+// Author : Rajath Umesh Joshi, CSE687 - Object Oriented Design, Spring 2017    
+// Dependencies :
+// DbCore.h
+/////////////////////////////////////////////////////////////////////
 #include <iostream>
 #include <string>
 #include <sstream>
@@ -12,7 +18,7 @@ using namespace NoSqlDb;
 namespace RepoUtility {
 
 	typedef std::string Item;
-
+	// It verifies whether package is present in the repository.
 	template <typename T>
 	bool checkFileExistance(Item fileName,DbCore<T>& dbH) {
 		if (!dbH.contains(fileName)) {

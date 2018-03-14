@@ -1,4 +1,12 @@
 #pragma once
+/////////////////////////////////////////////////////////////////////
+// CheckIn.h - It supports checkin of package.                      
+// Author : Rajath Umesh Joshi, CSE687 - Object Oriented Design, Spring 2017    
+// Dependencies :
+// RepositoryUtility.h
+// DbCore.h
+// FileSystem.h
+/////////////////////////////////////////////////////////////////////
 #include <string>
 #include <vector>
 #include <cstddef>
@@ -8,6 +16,7 @@
 #include "../RepositoryUtility/RepositoryUtility.h"
 
 using namespace NoSqlDb;
+using namespace FileSystem;
 
 template <typename T>
 class CheckIn {
@@ -15,7 +24,7 @@ public:
 	using DbHandle=DbCore<T>;
 	using Item = std::string;
 	using Items = std::vector<Item>;
-	CheckIn(Item dstDir,Item author, Item description,Items children, Items categories, Item filePath, bool checkInStatus,DbHandle& db);
+	CheckIn(Item dstDir,Item author, Item description,Items  children, Items categories, Item filePath, bool checkInStatus,DbHandle& db);
 	~CheckIn();
 	CheckIn(const CheckIn& chk);
 	CheckIn<T>& operator=(const CheckIn<T>& chk);
@@ -38,7 +47,6 @@ private:
 	DbHandle& dbH;
 
 };
-
 template <typename T>
 CheckIn<T>::CheckIn(Item dstDir,Item author, Item description,Items children, Items categories, Item filePath, bool checkInStatus, DbHandle& db) :
 	repoPath(dstDir),author_(author),description_(description),children_(children) ,categories_(categories), fileSrc(filePath), open(checkInStatus), dbH(db) {
@@ -47,9 +55,7 @@ CheckIn<T>::CheckIn(Item dstDir,Item author, Item description,Items children, It
 
 template <typename T>
 CheckIn<T>::~CheckIn() {
-	std::cout << "Destructor for CheckInObject" << std::endl;
 }
-
 
 template <typename T>
 CheckIn<T>::CheckIn(const CheckIn& chk) {
@@ -76,13 +82,13 @@ DbElement<T> CheckIn<T>::createDbElement(Item fileName)
 	dbElem.descrip(description_);
 	dbElem.dateTime(DateTime().now());
 	dbElem.children(children_);
-	T pl(categories_, fileSrc, open);
+	T pl(categories_, Path::getFullFileSpec(fileSrc), open);
 	dbElem.payLoad(pl);
 
 	return dbElem;
 }
 
-
+// It  is used to commit the package.
 template <typename T>
 bool CheckIn<T>::commit() {
 	bool retVal = false;
@@ -154,7 +160,7 @@ bool CheckIn<T>::commit() {
 	}
 }
 
-
+// This function is used to verify author of the file.
 template <typename T>
 bool CheckIn<T>::verifyAuthor(Item fileName) {
 	bool retVal = false;
@@ -167,7 +173,7 @@ bool CheckIn<T>::verifyAuthor(Item fileName) {
 
 	return retVal;
 }
-
+// This function is used to check whether the file exists in the repository.
 template <typename T>
 bool CheckIn<T>::checkIfFileExists() {
 	if (FileSystem::File::exists(fileSrc))
@@ -175,14 +181,14 @@ bool CheckIn<T>::checkIfFileExists() {
 	else
 		return false;
 }
-
+// This function is used to obtain the full path of source file.
 template <typename T>
 std::string CheckIn<T>::getFileNameOnly(std::string fullPath) {
 	std::cout << "The full path of the source file is " << fullPath << std::endl;
-	std::size_t found = fullPath.find_last_of("\\");
+	std::size_t found = fullPath.find_last_of("/");
 	return fullPath.substr(found + 1);
 }
-
+// This function checks whether dependent files are present in the repository or not.
 template <typename T>
 bool CheckIn<T>::dependancyExistenceCheck(Item fileName) {
 	DbElement<T> dbElem = dbH[fileName];
@@ -197,7 +203,7 @@ bool CheckIn<T>::dependancyExistenceCheck(Item fileName) {
 	return true;
 	
 }
-
+//  This function checks the previous chcekin status of a file.
 template<typename T>
 inline bool CheckIn<T>::checkPrevCheckInStatus(Item fileName)
 {

@@ -1,4 +1,15 @@
 #pragma once
+/////////////////////////////////////////////////////////////////////
+// RepositoryCore.h - Repository core  supports calls for CheckIn, CheckOut and Browse.                    
+// Author : Rajath Umesh Joshi, CSE687 - Object Oriented Design, Spring 2017    
+// Dependencies :
+// RepositoryUtility.h
+// DbCore.h
+// FileSystem.h
+// Checkin.h
+// CheckOut.h
+// Browse.h
+/////////////////////////////////////////////////////////////////////
 #include "../DbCore/DbCore.h"
 #include "../CheckIn/CheckIn.h"
 #include "../CheckOut/CheckOut.h"
@@ -26,11 +37,10 @@ namespace Repository {
 	};
 
 
-	RepositoryCore::RepositoryCore()
-	{
-		std::cout << "Default constructor\n";
-	}
+	RepositoryCore::RepositoryCore(){}
 
+
+	// This function initiates the checkin process.
 	bool RepositoryCore::checkIn(Item author, Item description, Items children,Items categories, Item fileName, bool checkInStatus)
 	{
 		std::cout << "Initiating check-in process" << std::endl;
@@ -41,7 +51,7 @@ namespace Repository {
 			return true;
 		
 	}
-
+	// This function initiates Checkout process.
 	bool RepositoryCore::checkOut(Item fileName, int version)
 	{
 		std::cout << "Initiating checkout process" << std::endl;
@@ -51,7 +61,7 @@ namespace Repository {
 		else
 			return true;
 	}
-
+	//  This function initiates browse.
 	void RepositoryCore::browse()
 	{
 		int browseOption;

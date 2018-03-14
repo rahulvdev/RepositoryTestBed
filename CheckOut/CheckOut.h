@@ -1,4 +1,12 @@
 #pragma once
+/////////////////////////////////////////////////////////////////////
+// CheckOut.h - It supports the retrieval of package.                   
+// Author : Rajath Umesh Joshi, CSE687 - Object Oriented Design, Spring 2017    
+// Dependencies : 
+// RepositoryUtility.h
+// DbCore.h
+// FileSystem.h
+/////////////////////////////////////////////////////////////////////
 #include <string>
 #include "../DbCore/DbCore.h"
 #include "../RepositoryUtility/RepositoryUtility.h"
@@ -11,16 +19,18 @@ class CheckOut {
 public:
 	using DbHandle = DbCore<T>;
 	using Item = std::string;
-	CheckOut(Item dstDir, Item fileName, int version,DbHandle& db) :dstDir_(dstDir),fileName_(fileName),version_(version),dbH(db){}
+	CheckOut(Item dstDir, Item fileName, int version,DbHandle& db) :dstDir_(dstDir),fileName_(fileName),version_(version),dbH(db){
+		clientDir_ = FileSystem::Path::getFullFileSpec("../ClientStorage/");
+	}
 	bool processCheckOut();
 private:
-	DbHandle & dbH;
-	Item clientDir_ { "../ClientStorage/" };
+	DbHandle& dbH;
+	Item clientDir_;
 	Item dstDir_;
 	Item fileName_;
 	int version_;
 };
-
+// This function checks whether the file is present in the repository as well as the version of the file that needs to be checked out.
 template <typename T>
 inline bool CheckOut<T>::processCheckOut() {
 	int retVal = false;
